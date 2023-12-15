@@ -8,6 +8,8 @@ import java.util.List;
 import javadatamahasiswa.models.Mahasiswa;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadatamahasiswa.connection.DbConnection;
 
 /**
@@ -17,32 +19,32 @@ import javadatamahasiswa.connection.DbConnection;
 public class MahasiswaDao implements MahasiswaDaoInterface {
     
     Connection cn;
-    final String insert = "INSERT INTO mahasiswa (nim, name, address) values (?,?,?);";
+    final String insert = "INSERT INTO mahasiswa (nim, name, address) VALUES (?,?,?);";
     final String update = "UPDATE mahasiswa SET nim=?, name=?, address=? WHERE id=?;";
-    final String delete = "DELETE from mahasiswa WHERE id=?;";
+    final String delete = "DELETE mahasiswa WHERE id=?;";
     final String select = "SELECT * FROM mahasiswa;";
-    final String search = "SELECT * FROM mahasiswa WHERE (nim LIKE ? OR name LIKE ? OR address LIKE ?);";
+    final String search = "SELECT * FROM mahasiswa WHERE (nim LIKE ? OR name LIKE ? OR address LIKE ?)";
     
     public MahasiswaDao() {
         cn = new DbConnection().getConnection();
     }
-
+    
     @Override
     public void insert(Mahasiswa m) {
         PreparedStatement ps = null;
         try {
             ps = cn.prepareStatement(insert);
             ps.setString(1, m.getNim());
-            ps.setString(2,m.getNama());
+            ps.setString(2, m.getNama());
             ps.setString(3, m.getAlamat());
             ps.executeUpdate();
-        } catch (SQLException er){
-            er.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
             try {
                 ps.close();
-            } catch (SQLException er) {
-                er.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -53,17 +55,17 @@ public class MahasiswaDao implements MahasiswaDaoInterface {
         try {
             ps = cn.prepareStatement(update);
             ps.setString(1, m.getNim());
-            ps.setString(2,m.getNama());
+            ps.setString(2, m.getNama());
             ps.setString(3, m.getAlamat());
             ps.setInt(4, m.getId());
             ps.executeUpdate();
-        } catch (SQLException er){
-            er.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
             try {
                 ps.close();
-            } catch (SQLException er) {
-                er.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -75,67 +77,65 @@ public class MahasiswaDao implements MahasiswaDaoInterface {
             ps = cn.prepareStatement(delete);
             ps.setInt(1, id);
             ps.executeUpdate();
-        } catch (SQLException er){
-            er.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
             try {
                 ps.close();
-            } catch (SQLException er) {
-                er.printStackTrace();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
 
     @Override
     public List<Mahasiswa> all() {
-        List<Mahasiswa> listMahasiswa = null;
+        List<Mahasiswa> m = null;
         
         try {
-            listMahasiswa = new ArrayList<Mahasiswa>();
+            m = new ArrayList<Mahasiswa>();
             Statement st = cn.createStatement();
             ResultSet rs = st.executeQuery(select);
-            
-            while(rs.next()) {
-                Mahasiswa m = new Mahasiswa();
-                m.setId(rs.getInt("id"));
-                m.setNim(rs.getString("nim"));
-                m.setNama(rs.getString("name"));
-                m.setAlamat(rs.getString("address"));
-                listMahasiswa.add(m);
+            while (rs.next()) {
+                Mahasiswa b = new Mahasiswa();
+                b.setNim(rs.getString("nim"));
+                b.setNama(rs.getString("name"));
+                b.setAlamat(rs.getString("address"));
+                b.setId(rs.getInt("id"));
+                m.add(b);
             }
-            
-        } catch (SQLException er) {
-            er.printStackTrace();
+        } catch (SQLException ex) {
+            Logger.getLogger(MahasiswaDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return listMahasiswa;
+        return m;
     }
 
     @Override
-    public List<Mahasiswa> search(String keyword) {
-        List<Mahasiswa> listMahasiswa = null;
+    public List<Mahasiswa> search(String q) {
+        List<Mahasiswa> m = null;
         
         try {
-            listMahasiswa = new ArrayList<Mahasiswa>();
-            PreparedStatement ps = cn.prepareStatement(search);
-            ps.setString(1, keyword);
-            ps.setString(2, keyword);
-            ps.setString(3, keyword);
-            ResultSet rs = ps.executeQuery();
-            
-            while(rs.next()) {
-                Mahasiswa m = new Mahasiswa();
-                m.setId(rs.getInt("id"));
-                m.setNim(rs.getString("nim"));
-                m.setNama(rs.getString("name"));
-                m.setAlamat(rs.getString("address"));
-                listMahasiswa.add(m);
+            m = new ArrayList<Mahasiswa>();
+            PreparedStatement st = cn.prepareStatement(search);
+            st.setString(1, "%" + q + "%");
+            st.setString(2, "%" + q + "%");
+            st.setString(3, "%" + q + "%");
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Mahasiswa b = new Mahasiswa();
+                b.setNim(rs.getString("nim"));
+                b.setNama(rs.getString("name"));
+                b.setAlamat(rs.getString("address"));
+                b.setId(rs.getInt("id"));
+                m.add(b);
             }
-        } catch (SQLException er) {
-            er.printStackTrace();
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(MahasiswaDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return listMahasiswa;
+        return m;
     }
     
 }

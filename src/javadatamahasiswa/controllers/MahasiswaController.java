@@ -54,4 +54,61 @@ public class MahasiswaController {
             JOptionPane.showMessageDialog(null, "Data NIM atau Nama tidak boleh kosong!");
         }
     }
+    
+    public void update() {
+        if (!view.getTxtId().getText().trim().isEmpty()) {
+            Mahasiswa m = new Mahasiswa();
+            m.setId(Integer.parseInt(view.getTxtId().getText()));
+            m.setNim(view.getTxtNim().getText());
+            m.setNama(view.getTxtNama().getText());
+            m.setAlamat(view.getTxtAlamat().getText());
+
+            dao.update(m);
+            JOptionPane.showMessageDialog(null, "Data berhasil diubah");
+            
+        } else {
+            
+            JOptionPane.showMessageDialog(null, "Belum ada data yang dipilih!");
+        }
+    }
+    
+    public void delete() {
+        if (!view.getTxtId().getText().trim().isEmpty()) {
+            int id = Integer.parseInt(view.getTxtId().getText());
+            String nim = view.getTxtNim().getText();
+
+            int choice = JOptionPane.showConfirmDialog(view, 
+                    "Hapus data dengan NIM: " + nim, 
+                    "Konfirmasi", 
+                    JOptionPane.YES_NO_CANCEL_OPTION
+            );
+
+            switch(choice) {
+                case JOptionPane.YES_OPTION -> dao.delete(id);
+            }
+            
+        } else {
+            
+            JOptionPane.showMessageDialog(null, "Belum ada data yang dipilih!");
+        }
+    }
+    
+    public void setSearchTable() {
+        listMahasiswa = dao.search(view.getTxtCariData().getText());
+        MahasiswaTable mt = new MahasiswaTable(listMahasiswa);
+        view.tabelMahasiswa().setModel(mt);
+        
+    }
+    
+    public void search() {
+        if (!view.getTxtCariData().getText().trim().isEmpty()) {
+            
+            dao.search(view.getTxtCariData().getText());
+            setSearchTable();
+            
+        } else {
+            
+            JOptionPane.showMessageDialog(view, "Kolom pencarian masing kosong!");
+        }
+    }
 }
